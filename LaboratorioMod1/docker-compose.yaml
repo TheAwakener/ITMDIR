@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+ KaliLinux:
+  image: itmdir/itm_dir_images:kalibasic
+  network_mode: none
+  container_name: "Kali_Linux"
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+ VulnServer:
+  image: itmdir/itm_dir_images:VulnServer
+  network_mode: none
+  container_name: "Server_Linux"
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+ Gateway:
+  image: itmdir/itm_dir_images:routeros
+  container_name: "Router"
+  command: ["/sbin/init"]
+  privileged: true
+ Nmonitor:
+  image: itmdir/itm_dir_images:ZeekMon
+  network_mode: none
