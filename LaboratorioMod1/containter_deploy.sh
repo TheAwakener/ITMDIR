@@ -1,7 +1,22 @@
 #!/bin/bash
 
+swname="switch01"
+
+function validate_container(){
+	cont=$1
+	cname=$2
+
+	if [ ${#cont} -eq 0 ];then
+		printf "\n[ERROR] el contenedor $cname no esta iniciado o finalizo inesperadamente, saliendo...\n"
+		exit 1
+	else
+		printf "\n[OK] contenedor $cname creado con ID $cont\n"
+	fi
+
+}
+
 function pkg_install(){
-        local vsw_path="https://www.openvswitch.org/releases/openvswitch-2.13.1.tar.gz"
+        vsw_path="https://www.openvswitch.org/releases/openvswitch-2.13.1.tar.gz"
 
         printf "[U] Instalando llaves del repositorio de docker..."
         $(sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - > /dev/null)
@@ -30,42 +45,56 @@ function pkg_install(){
 	printf "[OK]\n\n"
 }
 
+
 function config_switch(){
-	printf "[!] Aprovisionando infraestructura: switch e interfaces virtuales\n"
-
-	printf "[C] Configurando switch virtual [Nombre: copr_switch]... "
-	$(sudo ovs-vsctl add-br corp_switch)
-	printf "[OK]\n"
-
-	printf "[C] Configurando interfaces en el switch..."
-
-	for iface in $(seq 0 7);do
-		printf "\t>> Agregando interface ether$iface... "
-		if [ $iface -lt 2 ];then
-			local vlan=10 #10.1.0.0/24
-		elif [ $iface -le 3 ] && [ $iface -gt 1 ];then
-			local vlan=20 #10.1.1.0/24
-		elif [ $iface -le 5 ] && [ $iface -gt 3 ];then
-			local vlan=30 #10.1.2.0/24
-		elif [ $iface -le 7 ] && [ $iface -gt 5 ];then
-			local vlan=40 #10.1.3.0/24
-		fi
-
-		$(sudo ip link add name vther$iface type veth peer name ether$iface)
-		$(sudo ovs-vsctl add-port corp_switch ether$iface tag=$vlan)
-		printf "[OK]\n"
-
-	done
-	printf "[OK] Switch listo!, configuracion:"
-	printf ""
+	printf "[C] Configurando switch virtual [Nombre: switch01]... "
+	$(sudo ovs-vsctl add-br $swname)
+	printf "[OK] Switch listo!\n"
 
 }
 
-function container_deploy(){
-        printf "[D] Agregando imagen docker de Kali linux..."
-	$(sudo docker pull kalilinux/kali-rolling > /dev/null)
-	local image_id=$(sudo docker images | grep -oP )
+
+function network_deploy(){
+	printf "[D] Desplegango red virtual..."
+	cont_names=("kali" "workstation" "server" "gateway" "nmonitor")
+	for container in ${cont_names[*]}; do
+		contid=$(sudo docker ps -q -f name=$container)
+		if [ $container == "kali" ];then
+			$(sudo ovs-docker add-port $swname eth0 $contid --ipaddress=10.1.0.2/24 --gateway=10.1.0.1)
+			$(sudo ovs-docker set-vlan $swname eth0 $contid 10)
+		elif [ $container == "workstation" ]; then
+			$(sudo ovs-docker add-port $swname eth0 $contid --ipaddress=10.1.0.3/24 --gateway=10.1.0.1)
+                        $(sudo ovs-docker set-vlan $swname eth0 $contid 10)
+		elif [ $container == "server" ];then
+			$(sudo ovs-docker add-port $swname eth0 $contid --ipaddress=10.2.0.2/24 --gateway=10.2.0.1)
+			$(sudo ovs-docker set-vlan $swname eth0 $contid 20)
+		elif [ $container == "gateway" ]; then
+			$(sudo ovs-docker add-port $swname eth1 $contid)
+		elif [ $container == "nmonitor"  ];then
+			$(sudo ovs-docker add-port $swname eth0 $contid)
+		fi
+	done
+
+
+	ifaces=($(sudo ovs-vsctl list-ports $swname))
+        nmiface=${ifaces[4]}
+
+	printf "[C] configurando port-mirror en interface $nmiface"
+        $(sudo ovs-vsctl --id=@p get port $nmiface -- --id=@m create mirror name=m0 select-all=true output-port=@p -- set bridge $swname mirrors=@m > /dev/null)
+
+	#$(sudo ovs-vsctl --id=@p get port $nmiface --id=@m create mirror name=m0 select-all=true output-port=@p set bridge $swname mirrors=@m)
 	printf "[OK]\n"
+}
+
+
+function container_deploy(){
+	stcont=""
+        printf "[D] Descargando script YAML para despliegue de contenedores..."
+	#$(wget -q --no-check-certificate https://raw.githubusercontent.com/jramirezgo/ITMDIR/master/LaboratorioMod1/docker-compose.yaml)
+	printf "[OK]\n"
+	printf "[I] Desplegando contenedores... "
+	$(sudo docker-compose up -d)
+	printf "[OK] Listo!\n"
 }
 
 
@@ -76,6 +105,8 @@ function veth_config(){
 function main(){
         #pkg_install
 	config_switch
+	container_deploy
+	network_deploy
 }
 
 main

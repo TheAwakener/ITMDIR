@@ -1,24 +1,39 @@
 version: "3.8"
 services:
- KaliLinux:
+ kali:
   image: itmdir/itm_dir_images:kalibasic
   network_mode: none
-  container_name: "Kali_Linux"
+  container_name: "kali"
+  tty: true
   dns:
    - 8.8.8.8
    - 8.8.4.4
- VulnServer:
+ workstation:
+  image: itmdir/itm_dir_images:workstation
+  network_mode: none
+  container_name: "workstation"
+  tty: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+ server:
   image: itmdir/itm_dir_images:VulnServer
   network_mode: none
-  container_name: "Server_Linux"
+  container_name: "server"
+  command: ["bash"]
+  tty: true
+  #sh -c /bin/services.sh && bash
   dns:
    - 8.8.8.8
    - 8.8.4.4
- Gateway:
+ gateway:
   image: itmdir/itm_dir_images:routeros
-  container_name: "Router"
+  container_name: "gateway"
   command: ["/sbin/init"]
   privileged: true
- Nmonitor:
+ nmonitor:
   image: itmdir/itm_dir_images:ZeekMon
+  container_name: "nmonitor"
   network_mode: none
+  privileged: true
+  tty: true
