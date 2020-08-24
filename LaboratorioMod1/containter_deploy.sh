@@ -79,10 +79,8 @@ function network_deploy(){
 	ifaces=($(sudo ovs-vsctl list-ports $swname))
         nmiface=${ifaces[4]}
 
-	printf "[C] configurando port-mirror en interface $nmiface"
+	printf "[C] configurando port-mirror en interface $nmiface... "
         $(sudo ovs-vsctl --id=@p get port $nmiface -- --id=@m create mirror name=m0 select-all=true output-port=@p -- set bridge $swname mirrors=@m > /dev/null)
-
-	#$(sudo ovs-vsctl --id=@p get port $nmiface --id=@m create mirror name=m0 select-all=true output-port=@p set bridge $swname mirrors=@m)
 	printf "[OK]\n"
 }
 
@@ -90,7 +88,7 @@ function network_deploy(){
 function container_deploy(){
 	stcont=""
         printf "[D] Descargando script YAML para despliegue de contenedores..."
-	#$(wget -q --no-check-certificate https://raw.githubusercontent.com/jramirezgo/ITMDIR/master/LaboratorioMod1/docker-compose.yaml)
+	$(wget -q --no-check-certificate https://raw.githubusercontent.com/jramirezgo/ITMDIR/master/LaboratorioMod1/docker-compose.yaml)
 	printf "[OK]\n"
 	printf "[I] Desplegando contenedores... "
 	$(sudo docker-compose up -d)
@@ -99,7 +97,16 @@ function container_deploy(){
 
 
 function veth_config(){
-        echo ""
+        printf "[T] Ajustando interface modo promiscuo en Nmonitor... "
+	$(sudo docker exec nmonitor ip link set eth0 promisc on)
+	printf "[OK]\n"
+
+	printf "[T] Desplegando Zeek... "
+	$(sudo docker exec nmonitor zeekctl deploy)
+	printf "[OK]\n"
+
+	printf "[T] Iniciando servicios en VLAN de servidores... "
+	$(sudo docker exec server /bin/services.sh)
 }
 
 function main(){
