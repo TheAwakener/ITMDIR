@@ -2,18 +2,6 @@
 
 swname="switch01"
 
-function validate_container(){
-	cont=$1
-	cname=$2
-
-	if [ ${#cont} -eq 0 ];then
-		printf "\n[ERROR] el contenedor $cname no esta iniciado o finalizo inesperadamente, saliendo...\n"
-		exit 1
-	else
-		printf "\n[OK] contenedor $cname creado con ID $cont\n"
-	fi
-
-}
 
 function pkg_install(){
         vsw_path="https://www.openvswitch.org/releases/openvswitch-2.13.1.tar.gz"
@@ -82,6 +70,20 @@ function network_deploy(){
 	printf "[C] configurando port-mirror en interface $nmiface... "
         $(sudo ovs-vsctl --id=@p get port $nmiface -- --id=@m create mirror name=m0 select-all=true output-port=@p -- set bridge $swname mirrors=@m > /dev/null)
 	printf "[OK]\n"
+
+	printf "[T] Ajustando interface modo promiscuo en Nmonitor... "
+        $(sudo docker exec nmonitor ip link set eth0 promisc on)
+        printf "[OK]\n"
+
+        printf "[T] Desplegando Zeek... "
+        $(sudo docker exec nmonitor zeekctl deploy)
+        printf "[OK]\n"
+
+        printf "[T] Iniciando servicios en VLAN de servidores... "
+        $(sudo docker exec -d server /bin/services.sh)
+	$(sleep 20)
+	$(sudo docker exec server service apache2 start)
+        printf "[OK]\n"
 }
 
 
@@ -96,18 +98,6 @@ function container_deploy(){
 }
 
 
-function veth_config(){
-        printf "[T] Ajustando interface modo promiscuo en Nmonitor... "
-	$(sudo docker exec nmonitor ip link set eth0 promisc on)
-	printf "[OK]\n"
-
-	printf "[T] Desplegando Zeek... "
-	$(sudo docker exec nmonitor zeekctl deploy)
-	printf "[OK]\n"
-
-	printf "[T] Iniciando servicios en VLAN de servidores... "
-	$(sudo docker exec server /bin/services.sh)
-}
 
 function main(){
         #pkg_install

@@ -1,4 +1,12 @@
 version: "3.8"
+
+networks:
+  wan:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.0.0/24"
+
 services:
  kali:
   image: itmdir/itm_dir_images:kalibasic
@@ -8,6 +16,7 @@ services:
   dns:
    - 8.8.8.8
    - 8.8.4.4
+
  workstation:
   image: itmdir/itm_dir_images:workstation
   network_mode: none
@@ -16,6 +25,7 @@ services:
   dns:
    - 8.8.8.8
    - 8.8.4.4
+
  server:
   image: itmdir/itm_dir_images:VulnServer
   network_mode: none
@@ -26,11 +36,16 @@ services:
   dns:
    - 8.8.8.8
    - 8.8.4.4
+
  gateway:
-  image: itmdir/itm_dir_images:VyOS_Router
+  image: itmdir/itm_dir_images:vyos_router
   container_name: "gateway"
+  networks:
+   wan:
+    ipv4_address: 172.16.0.2
   command: ["/sbin/init"]
   privileged: true
+
  nmonitor:
   image: itmdir/itm_dir_images:ZeekMon
   container_name: "nmonitor"
