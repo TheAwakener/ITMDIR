@@ -1,0 +1,13 @@
+Vagrant.configure("2") do |config|
+
+	#Parametros de la maquina virtual:
+	config.vm.box = "hashicorp/bionic64" #Imagen del SO: Ubuntu Bionic64
+	config.vm.box_version = "1.0.282"	
+	config.vm.network "private_network", ip: "10.0.0.10"
+	end
+
+	#Aprovisionamiento de la maquina: instalacion de Docker, Open vSwitch, etc
+	config.vm.provision "shell", path: "./provisioning_scripts/lab1_pkg_provisioning.sh"
+
+
+end
