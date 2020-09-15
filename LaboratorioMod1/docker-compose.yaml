@@ -18,8 +18,9 @@ services:
    - 8.8.4.4
 
  workstation:
-  image: itmdir/itm_dir_images:workstation
+  image: itmdir/itm_dir_images:Workstation
   network_mode: none
+  command: sh /home/scripts/web_auth_automation.sh
   container_name: "workstation"
   tty: true
   dns:
@@ -32,6 +33,7 @@ services:
   container_name: "server"
   command: ["bash"]
   tty: true
+  privileged: true
   #sh -c /bin/services.sh && bash
   dns:
    - 8.8.8.8
