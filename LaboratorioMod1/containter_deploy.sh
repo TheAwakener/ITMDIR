@@ -106,7 +106,7 @@ function container_deploy(){
 
 
 function main(){
-        #pkg_install
+        pkg_install
 	config_switch
 	container_deploy
 	network_deploy
