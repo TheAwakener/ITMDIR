@@ -79,7 +79,7 @@ function network_deploy(){
 	printf "[OK]\n"
 	
 	printf "[CONFIG] Configurando router/firewall...\n"
-	sudo docker exec -d gateway su vyos sg vyattacfg -c scripts/provision_script.sh
+	sudo docker exec -d gateway su vyos sg vyattacfg -c scripts/provision.sh
 }
 
 function container_deploy(){
