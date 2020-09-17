@@ -84,13 +84,16 @@ function network_deploy(){
         printf "[T] Iniciando servicios en VLAN de servidores... "
         sudo docker exec -d server /bin/services.sh > /dev/null
 	sleep 10
-	sudo docker exec server service apache2 start > /dev/null
+	sudo docker exec -d server service apache2 start > /dev/null
         printf "[OK]\n"
 
 	printf "[T] Ajustando IPTABLES..."
 	sudo docker exec -d server iptables -A INPUT -s 10.1.0.0/24 -d 0.0.0.0/0 -j ACCEPT > /dev/null
 	sudo docker exec -d server iptables -P INPUT DROP > /dev/null
 	printf "[OK]\n"
+	
+	printf "[T] Configurando router/firewall... "
+	sudo docker exec -d gateway su vyos sg vyattacfg -c scripts/provision_script.sh
 }
 
 function container_deploy(){
