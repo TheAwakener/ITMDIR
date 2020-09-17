@@ -86,8 +86,12 @@ function network_deploy(){
 	sleep 10
 	sudo docker exec server service apache2 start > /dev/null
         printf "[OK]\n"
-}
 
+	printf "[T] Ajustando IPTABLES..."
+	sudo docker exec -d server iptables -A INPUT -s 10.1.0.0/24 -d 0.0.0.0/0 -j ACCEPT > /dev/null
+	sudo docker exec -d server iptables -P INPUT DROP > /dev/null
+	printf "[OK]\n"
+}
 
 function container_deploy(){
 	stcont=""
@@ -107,5 +111,4 @@ function main(){
 	container_deploy
 	network_deploy
 }
-
 main

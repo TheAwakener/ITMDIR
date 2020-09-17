@@ -47,6 +47,9 @@ services:
     ipv4_address: 172.16.0.2
   command: ["/sbin/init"]
   privileged: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
 
  nmonitor:
   image: itmdir/itm_dir_images:ZeekMon

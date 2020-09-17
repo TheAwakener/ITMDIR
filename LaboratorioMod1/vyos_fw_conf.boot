@@ -21,6 +21,16 @@ firewall {
     }
     name politica_servicios {
         default-action drop
+        rule 1 {
+            action accept
+            destination {
+                address 10.2.0.0/24
+            }
+            protocol icmp
+            source {
+                address 10.1.0.3/32
+            }
+        }
         rule 2 {
             action accept
             destination {
