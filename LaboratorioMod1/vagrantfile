@@ -2,12 +2,11 @@ Vagrant.configure("2") do |config|
 
 	#Parametros de la maquina virtual:
 	config.vm.box = "hashicorp/bionic64" #Imagen del SO: Ubuntu Bionic64
-	config.vm.box_version = "1.0.282"	
-	config.vm.network "private_network", ip: "10.0.0.10"
-	end
+	config.vm.disk :disk, size: "32GB", primary: true 
+	#end
 
 	#Aprovisionamiento de la maquina: instalacion de Docker, Open vSwitch, etc
-	config.vm.provision "shell", path: "./provisioning_scripts/lab1_pkg_provisioning.sh"
+	config.vm.provision "shell", path: "https://raw.githubusercontent.com/jramirezgo/ITMDIR/master/LaboratorioMod1/containter_deploy.sh"
 
 
 end
