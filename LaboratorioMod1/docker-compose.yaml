@@ -40,7 +40,7 @@ services:
    - 8.8.4.4
 
  gateway:
-  image: itmdir/itm_dir_images:vyos_router
+  image: itmdir/itm_dir_images:vyos_gateway
   container_name: "gateway"
   networks:
    wan:
