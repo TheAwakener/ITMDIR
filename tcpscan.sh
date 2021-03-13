@@ -1,16 +1,14 @@
 #!/bin/bash
-
 function main(){
 	if [[ ${#@} -ne 2 ]];then
-		printf "USAGE: $0 [IP_ADDRESS or DOMAIN_NAME] [PORT_RANGE: N1,N2]"
+		printf "USAGE: $0 [IP_ADDRESS or DOMAIN_NAME] [PORT_LIST: P1,P2,P3...PN]\n"
 		exit 1
 	fi
 
-	lport=$(echo $2 | cut -d "," -f 1)
-	hport=$(echo $2 | cut -d "," -f 2)
 	dserver=$1
-
-	for port in $(seq $lport $hport);do
+	port_list=$2
+	IFS=","
+	for port in $port_list;do
 		printf "$(nc -z -v -w 1 $dserver $port)"
 	done
 
