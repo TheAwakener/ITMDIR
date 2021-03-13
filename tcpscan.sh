@@ -1,7 +1,7 @@
 #!/bin/bash
 function main(){
 	if [[ ${#@} -ne 2 ]];then
-		printf "USAGE: $0 [IP_ADDRESS or DOMAIN_NAME] [SINGLE_PORT:P or PORT_LIST: P1,P2,P3...PN]\n"
+		printf "USAGE: $0 [IP_ADDRESS or DOMAIN_NAME] [SINGLE_PORT: P0 or PORT_LIST: P1,P2,P3...PN]\n"
 		exit 1
 	fi
 
