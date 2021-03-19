@@ -1,0 +1,57 @@
+version: "3.0"
+
+networks:
+  wan:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.0.0/24"
+
+services:
+ kali:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:kali
+  network_mode: none
+  container_name: "kali"
+  tty: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+
+ workstation:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:workstation
+  network_mode: none
+  #command: sh /home/scripts/web_auth_automation.sh
+  container_name: "workstation"
+  tty: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+
+ server:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:services
+  network_mode: none
+  container_name: "services"
+  command: sh -c "/bin/services.sh && bash"
+  tty: true
+  privileged: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+
+ firewall:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:firewall
+  container_name: "firewall"
+  networks:
+   wan:
+    ipv4_address: 172.16.0.2
+  privileged: true
+  dns:
+   - 8.8.8.8
+   - 8.8.4.4
+
+ netmonitor:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:netmonitor
+  container_name: "netmonitor"
+  network_mode: none
+  privileged: true
+  tty: true
