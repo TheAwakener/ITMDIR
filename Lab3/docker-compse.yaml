@@ -20,7 +20,7 @@ services:
  workstation:
   image: ov3rlordii/itm_deteccion_intrusos_labs:workstation
   network_mode: none
-  #command: sh /home/scripts/web_auth_automation.sh
+  command: sh /client_request.sh
   container_name: "workstation"
   tty: true
   dns:
