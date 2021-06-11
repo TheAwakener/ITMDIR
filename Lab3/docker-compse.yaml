@@ -55,3 +55,10 @@ services:
   network_mode: none
   privileged: true
   tty: true
+
+ nids:
+  image: ov3rlordii/itm_deteccion_intrusos_labs:nids
+  container_name: "nids"
+  network_mode: none
+  privileged: true
+  tty: true
